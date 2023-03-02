@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
-    <height>400</height>
+    <width>844</width>
+    <height>591</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,6 +16,92 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QTextEdit" name="Code"/>
+   </item>
+   <item>
+    <widget class="QPushButton" name="chooseFile">
+     <property name="text">
+      <string>Выбрать файл</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QTableWidget" name="resultTable">
+     <property name="sizeAdjustPolicy">
+      <enum>QAbstractScrollArea::AdjustToContents</enum>
+     </property>
+     <property name="editTriggers">
+      <set>QAbstractItemView::NoEditTriggers</set>
+     </property>
+     <property name="tabKeyNavigation">
+      <bool>false</bool>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::NoSelection</enum>
+     </property>
+     <column>
+      <property name="text">
+       <string>j</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Оператор</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>f1j</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>i</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Операнд</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>f2i</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="dictionaryLabel">
+     <property name="text">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Словарь программы &lt;span style=&quot; font-weight:700;&quot;&gt;η&lt;/span&gt; = &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::MarkdownText</enum>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="lengthLabel">
+     <property name="text">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Длинная программы &lt;span style=&quot; font-weight:700;&quot;&gt;N&lt;/span&gt; = &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="volumeLable">
+     <property name="text">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Объем программы &lt;span style=&quot; font-weight:700;&quot;&gt;V&lt;/span&gt; = &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

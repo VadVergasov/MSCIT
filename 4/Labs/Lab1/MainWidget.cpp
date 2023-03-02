@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "MainWidget.h"
 
 const std::regex MainWidget::class_regular("(class|struct){1} +([a-zA-Z][\\w_-]+)( *(:) *(public|private|protected)? +([\\w\\:<>, -]*))?");
@@ -63,7 +63,7 @@ void MainWidget::find_functions() {
 		code = result.suffix();
 	}
 	for (const auto &[f, s] : functions) {
-		data[5].second.push_back("Êîëè÷åñòâî ïåðåãðóçîê ôóíêöèè: " + f + ": " + std::to_string(s));
+		data[5].second.push_back("ÐšÐ¾Ð»Ð¸Ñ‡ÐµÑÑ‚Ð²Ð¾ Ð¿ÐµÑ€ÐµÐ³Ñ€ÑƒÐ·Ð¾Ðº Ñ„ÑƒÐ½ÐºÑ†Ð¸Ð¸: " + f + ": " + std::to_string(s));
 	}
 }
 
@@ -130,4 +130,20 @@ void MainWidget::find_errors() {
 		data[7].second.push_back(result[0].str());
 		code = result.suffix();
 	}
+}
+
+void MainWidget::on_chooseFile_clicked() {
+	QString file = QFileDialog::getOpenFileName(this, "Ð’Ñ‹Ð±ÐµÑ€ÐµÑ‚Ðµ Ñ„Ð°Ð¹Ð»", "", "Source files (*.cpp)");
+	if (file.isEmpty()) {
+		return;
+	}
+	QFile input = QFile(file, this);
+	input.open(QIODevice::ReadOnly);
+	QString content = input.readAll();
+	input.close();
+	ui.Code->setPlainText(content);
+}
+
+void MainWidget::on_Code_textChanged() {
+
 }

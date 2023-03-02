@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <QWidget>
 #include "ui_MainWidget.h"
@@ -31,4 +31,8 @@ private:
 	void find_locals();
 	void find_branches();
 	void find_errors();
+
+private slots:
+	void on_chooseFile_clicked();
+	void on_Code_textChanged();
 };
