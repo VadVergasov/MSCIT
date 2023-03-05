@@ -24,7 +24,10 @@ class MyRecursiveASTVisitor
 
    public:
     MyRecursiveASTVisitor(clang::ASTContext *p_astContext)
-        : p_astContext(p_astContext) {}
+        : p_astContext(p_astContext) {
+        operators.clear();
+        operands.clear();
+    }
 
     /**
      * Overide the TraverseDecl method to avoid traversing declarations from
@@ -313,6 +316,14 @@ class MyRecursiveASTVisitor
     }
 
     /**
+     * Parenthesized expr
+     */
+    bool VisitParenExpr(clang::ParenExpr *p_expr) {
+        operators["()"]++;
+        return true;
+    }
+
+    /**
      * TEMPLATES
      */
 
@@ -394,7 +405,6 @@ class MyRecursiveASTVisitor
 
     bool VisitConditionalOperator(clang::ConditionalOperator *p_cond) {
         operators["?"]++;
-        operators["()"]++;
         return true;
     }
 
