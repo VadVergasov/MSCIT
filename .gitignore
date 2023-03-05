@@ -1,4 +1,7 @@
 *.txt
+!CMakeLists.txt
+**/build/**
+**/.vscode/**
 .vs
 *.exe*
 Debug/
