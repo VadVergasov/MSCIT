@@ -17,6 +17,11 @@ ParserHalstead::parse(int argc, char const *argv[]) {
     int res = tool.run(
         clang::tooling::newFrontendActionFactory<MetricsCalculatorAction>().get());
 
+    if (res != 0) {
+        throw CompileException(
+            (std::string("Compilation error: ") + std::to_string(res)).c_str());
+    }
+
     std::vector<std::pair<std::string, int>> operators;
     for (auto const &op : MyRecursiveASTVisitor::operators) {
         operators.push_back({op.first, op.second});

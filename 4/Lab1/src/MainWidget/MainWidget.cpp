@@ -38,48 +38,56 @@ void MainWidget::on_parseButton_clicked() {
     argv[3] = "-std=c++20";
     argv[4] = "-isystem";
     argv[5] = "/usr/include/clang/12/include";
-    auto [operators, operands, N1, N2, n1, n2, N, n, V] = parser.parse(6, argv);
     ui.resultTable->setRowCount(0);
-    ui.resultTable->setRowCount(std::max(operators.size(), operands.size()) + 1);
-    ui.dictionaryLabel->setText(dictionaryLabelText + QString::number(n1) + " + " +
-                                QString::number(n2) + " = " + QString::number(n));
-    ui.lengthLabel->setText(lengthLabelText + QString::number(N1) + " + " +
-                            QString::number(N2) + " = " + QString::number(N));
-    ui.volumeLabel->setText(volumeLabelText + QString::number(N) + " * log(" +
-                            QString::number(n) + ") = " + QString::number(V));
-    size_t row = 0;
-    for (const auto& op : operators) {
-        ui.resultTable->setItem(row, 0,
-                                new QTableWidgetItem(QString::number(row + 1)));
-        ui.resultTable->setItem(row, 1,
-                                new QTableWidgetItem(QString(op.first.c_str())));
-        ui.resultTable->setItem(row, 2,
-                                new QTableWidgetItem(QString::number(op.second)));
-        row++;
-    }
-    ui.resultTable->setItem(row, 0,
-                            new QTableWidgetItem("n1 = " + QString::number(row)));
-    ui.resultTable->setItem(row, 2,
-                            new QTableWidgetItem("N1 = " + QString::number(N1)));
-    row = 0;
-    for (const auto& op : operands) {
-        if (op.first == " " || op.first.empty()) {
-            continue;
+    try {
+        auto [operators, operands, N1, N2, n1, n2, N, n, V] = parser.parse(6, argv);
+        ui.resultTable->setRowCount(std::max(operators.size(), operands.size()) +
+                                    1);
+        ui.dictionaryLabel->setText(dictionaryLabelText + QString::number(n1) +
+                                    " + " + QString::number(n2) + " = " +
+                                    QString::number(n));
+        ui.lengthLabel->setText(lengthLabelText + QString::number(N1) + " + " +
+                                QString::number(N2) + " = " + QString::number(N));
+        ui.volumeLabel->setText(volumeLabelText + QString::number(N) + " * log(" +
+                                QString::number(n) + ") = " + QString::number(V));
+        size_t row = 0;
+        for (const auto& op : operators) {
+            ui.resultTable->setItem(row, 0,
+                                    new QTableWidgetItem(QString::number(row + 1)));
+            ui.resultTable->setItem(
+                row, 1, new QTableWidgetItem(QString(op.first.c_str())));
+            ui.resultTable->setItem(
+                row, 2, new QTableWidgetItem(QString::number(op.second)));
+            row++;
         }
-        ui.resultTable->setItem(row, 3,
-                                new QTableWidgetItem(QString::number(row + 1)));
-        ui.resultTable->setItem(row, 4,
-                                new QTableWidgetItem(QString(op.first.c_str())));
-        ui.resultTable->setItem(row, 5,
-                                new QTableWidgetItem(QString::number(op.second)));
-        row++;
+        ui.resultTable->setItem(
+            row, 0, new QTableWidgetItem("n1 = " + QString::number(row)));
+        ui.resultTable->setItem(
+            row, 2, new QTableWidgetItem("N1 = " + QString::number(N1)));
+        row = 0;
+        for (const auto& op : operands) {
+            if (op.first == " " || op.first.empty()) {
+                continue;
+            }
+            ui.resultTable->setItem(row, 3,
+                                    new QTableWidgetItem(QString::number(row + 1)));
+            ui.resultTable->setItem(
+                row, 4, new QTableWidgetItem(QString(op.first.c_str())));
+            ui.resultTable->setItem(
+                row, 5, new QTableWidgetItem(QString::number(op.second)));
+            row++;
+        }
+        ui.resultTable->setItem(
+            row, 3, new QTableWidgetItem("n2 = " + QString::number(row)));
+        ui.resultTable->setItem(
+            row, 5, new QTableWidgetItem("N2 = " + QString::number(N2)));
+        ui.resultTable->horizontalHeader()->setStretchLastSection(true);
+        ui.resultTable->resizeColumnsToContents();
+        ui.resultTable->resizeRowsToContents();
+    } catch (const CompileException& error) {
+        QMessageBox::critical(
+            this, "Ошибка",
+            "Введенный код содержит ошибки и не может быть скомпилирован!");
     }
-    ui.resultTable->setItem(row, 3,
-                            new QTableWidgetItem("n2 = " + QString::number(row)));
-    ui.resultTable->setItem(row, 5,
-                            new QTableWidgetItem("N2 = " + QString::number(N2)));
-    ui.resultTable->horizontalHeader()->setStretchLastSection(true);
-    ui.resultTable->resizeColumnsToContents();
-    ui.resultTable->resizeRowsToContents();
     code.remove();
 }
