@@ -48,7 +48,7 @@ void MainWidget::on_parseButton_clicked() {
                                     QString::number(n));
         ui.lengthLabel->setText(lengthLabelText + QString::number(N1) + " + " +
                                 QString::number(N2) + " = " + QString::number(N));
-        ui.volumeLabel->setText(volumeLabelText + QString::number(N) + " * log(" +
+        ui.volumeLabel->setText(volumeLabelText + QString::number(N) + " * log2(" +
                                 QString::number(n) + ") = " + QString::number(V));
         size_t row = 0;
         for (const auto& op : operators) {

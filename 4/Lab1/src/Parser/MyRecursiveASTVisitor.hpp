@@ -316,6 +316,38 @@ class MyRecursiveASTVisitor
     }
 
     /**
+     * Break statement
+     */
+    bool VisitBreakStmt(clang::BreakStmt *b_stmt) {
+        operators["break"]++;
+        return true;
+    }
+
+    /**
+     * Continue statement
+     */
+    bool VisitBreakStmt(clang::ContinueStmt *c_stmt) {
+        operators["continue"]++;
+        return true;
+    }
+
+    /**
+     * Case statement
+     */
+    bool VisitCaseStmt(clang::CaseStmt *c_stmt) {
+        operators["case"]++;
+        return true;
+    }
+
+    /**
+     * Default statement
+     */
+    bool VisitDefaultStmt(clang::DefaultStmt *c_stmt) {
+        operators["default"]++;
+        return true;
+    }
+
+    /**
      * Parenthesized expr
      */
     bool VisitParenExpr(clang::ParenExpr *p_expr) {
