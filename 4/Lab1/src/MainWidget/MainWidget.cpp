@@ -1,11 +1,18 @@
-﻿#include "MainWidget.h"
+#include "MainWidget.h"
 
-MainWidget::MainWidget(QWidget* parent) : QWidget(parent) { ui.setupUi(this); }
+#include <QMessageBox>
+
+MainWidget::MainWidget(QWidget* parent) : QWidget(parent) {
+    ui.setupUi(this);
+    dictionaryLabelText = ui.dictionaryLabel->text();
+    lengthLabelText = ui.lengthLabel->text();
+    volumeLabelText = ui.volumeLabel->text();
+}
 
 MainWidget::~MainWidget() {}
 
 void MainWidget::on_chooseFile_clicked() {
-    file = QFileDialog::getOpenFileName(this, "Выберете файл", "",
+    file = QFileDialog::getOpenFileName(this, "Выберите файл", "",
                                         "Source files (*.cpp)");
     if (file.isEmpty()) {
         return;
@@ -18,12 +25,53 @@ void MainWidget::on_chooseFile_clicked() {
 }
 
 void MainWidget::on_parseButton_clicked() {
+    QFile code("tmp.cpp");
+    code.open(QIODeviceBase::WriteOnly);
+    code.write(ui.Code->toPlainText().toStdString().c_str(),
+               qstrlen(ui.Code->toPlainText().toStdString().c_str()));
+    code.close();
     ParserHalstead parser;
-    char const* argv[5];
-    argv[0] = std::string("./Lab1").c_str();
-    argv[1] = file.toStdString().c_str();
-    argv[2] = std::string("--").c_str();
-    argv[3] = std::string("-isystem").c_str();
-    argv[4] = std::string("/usr/include/clang/12/include").c_str();
-    parser.parse(5, argv);
+    char const* argv[6];
+    argv[0] = "./Lab1";
+    argv[1] = "tmp.cpp";
+    argv[2] = "--";
+    argv[3] = "-std=c++20";
+    argv[4] = "-isystem";
+    argv[5] = "/usr/include/clang/12/include";
+    auto [operators, operands, N1, N2, n1, n2, N, n, V] = parser.parse(6, argv);
+    ui.resultTable->setRowCount(0);
+    ui.resultTable->setRowCount(std::max(operators.size(), operands.size()));
+    ui.dictionaryLabel->setText(dictionaryLabelText + QString::number(n1) + " + " +
+                                QString::number(n2) + " = " + QString::number(n));
+    ui.lengthLabel->setText(lengthLabelText + QString::number(N1) + " + " +
+                            QString::number(N2) + " = " + QString::number(N));
+    ui.volumeLabel->setText(volumeLabelText + QString::number(N) + " * log(" +
+                            QString::number(n) + ") = " + QString::number(V));
+    size_t row = 0;
+    for (const auto& op : operators) {
+        ui.resultTable->setItem(row, 0,
+                                new QTableWidgetItem(QString::number(row + 1)));
+        ui.resultTable->setItem(row, 1,
+                                new QTableWidgetItem(QString(op.first.c_str())));
+        ui.resultTable->setItem(row, 2,
+                                new QTableWidgetItem(QString::number(op.second)));
+        row++;
+    }
+    row = 0;
+    for (const auto& op : operands) {
+        if (op.first == " " || op.first.empty()) {
+            continue;
+        }
+        ui.resultTable->setItem(row, 3,
+                                new QTableWidgetItem(QString::number(row + 1)));
+        ui.resultTable->setItem(row, 4,
+                                new QTableWidgetItem(QString(op.first.c_str())));
+        ui.resultTable->setItem(row, 5,
+                                new QTableWidgetItem(QString::number(op.second)));
+        row++;
+    }
+    ui.resultTable->horizontalHeader()->setStretchLastSection(true);
+    ui.resultTable->resizeColumnsToContents();
+    ui.resultTable->resizeRowsToContents();
+    code.remove();
 }

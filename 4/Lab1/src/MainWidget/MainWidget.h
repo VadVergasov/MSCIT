@@ -1,9 +1,10 @@
 ﻿#pragma once
 
+#include <QByteArray>
 #include <QFile>
 #include <QFileDialog>
 #include <QWidget>
-#include <regex>
+#include <iostream>
 #include <utility>
 #include <vector>
 
@@ -19,6 +20,9 @@ class MainWidget : public QWidget {
 
    private:
     Ui::Lab1 ui;
+    QString dictionaryLabelText;
+    QString lengthLabelText;
+    QString volumeLabelText;
 
     QString file;
 

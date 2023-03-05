@@ -14,6 +14,8 @@ file(GLOB_RECURSE SRC "src/*.hpp" "src/*.h" "src/*.ui" "src/*.cpp")
 
 add_executable(Lab1 ${SRC})
 
+set_property(TARGET Lab1 PROPERTY CXX_STANDARD 20)
+
 target_compile_options(Lab1 PRIVATE -fno-rtti)
 target_link_libraries(Lab1 PRIVATE LLVM clangTooling clangFrontend clangParse clangSema clangAnalysis clangAST clangBasic clangDriver clangSerialization clangEdit clangLex)
 include_directories(${LLVM_INCLUDE_DIRS})

@@ -51,16 +51,16 @@ class MyRecursiveASTVisitor
             // Class, struct, union or enum ?
             switch (p_decl->getTagKind()) {
                 case clang::TTK_Struct:
-                    operands["struct"] += 1;
+                    operators["struct"]++;
                     break;
                 case clang::TTK_Class:
-                    operands["class"] += 1;
+                    operators["class"]++;
                     break;
                 case clang::TTK_Enum:
-                    operands["enum"] += 1;
+                    operators["enum"]++;
                     break;
                 case clang::TTK_Union:
-                    operands["union"] += 1;
+                    operators["union"]++;
                     break;
                 default:
                     break;
@@ -68,14 +68,14 @@ class MyRecursiveASTVisitor
 
             // Get the name of the class/struct/enum/union if not anonymous.
             if (!p_decl->isAnonymousStructOrUnion()) {
-                operands[p_decl->getNameAsString()] += 1;
+                operands[p_decl->getNameAsString()]++;
             }
 
             // Process class/struct ancestors if any.
             for (auto &base : p_decl->bases()) {
-                // If virtual ancestor then add "virtual" keyword as operand.
+                // If virtual ancestor then add "virtual" keyword as operator.
                 if (base.isVirtual()) {
-                    operands["virtual"] += 1;
+                    operators["virtual"]++;
                 }
 
                 // Add ancestor access specifier as an operand.
@@ -84,20 +84,20 @@ class MyRecursiveASTVisitor
                 // given.
                 switch (base.getAccessSpecifier()) {
                     case clang::AS_public:
-                        operands["public"] += 1;
+                        operators["public"]++;
                         break;
                     case clang::AS_protected:
-                        operands["protected"] += 1;
+                        operators["protected"]++;
                         break;
                     case clang::AS_private:
-                        operands["private"] += 1;
+                        operators["private"]++;
                         break;
                     default:
                         break;
                 }
 
                 std::string str = base.getType().getAsString();
-                operands[str.substr(str.find(' ') + 1)] += 1;
+                operands[str.substr(str.find(' ') + 1)]++;
             }
         }
 
@@ -109,10 +109,10 @@ class MyRecursiveASTVisitor
      */
     bool VisitCXXMethodDecl(clang::CXXMethodDecl *p_decl) {
         if (p_decl->isConst()) {
-            operands["const"] += 1;
+            operators["const"]++;
         }
         if (p_decl->isVolatile()) {
-            operands["volatile"] += 1;
+            operators["volatile"]++;
         }
 
         return true;
@@ -126,15 +126,15 @@ class MyRecursiveASTVisitor
     bool VisitCXXConstructorDecl(clang::CXXConstructorDecl *p_decl) {
         // is explicit ?
         if (p_decl->isExplicit()) {
-            operands["explicit"] += 1;
+            operators["explicit"]++;
         }
 
         // TODO: add ":" as operator ?
 
         // initializers
         for (auto const &init : p_decl->inits()) {
-            operands[init->getMember()->getNameAsString()] += 1;
-            operators["()"] += 1;
+            operands[init->getMember()->getNameAsString()]++;
+            operators["()"]++;
         }
 
         return true;
@@ -146,30 +146,32 @@ class MyRecursiveASTVisitor
     bool VisitVarDecl(clang::VarDecl *p_decl) {
         // static C
         if (p_decl->isModulePrivate()) {
-            operands["static"] += 1;
+            operators["static"]++;
         }
 
         // static C++
         switch (p_decl->getStorageClass()) {
             case clang::SC_Static:
-                operands["static"] += 1;
+                operators["static"]++;
                 break;
             default:
                 break;
         }
 
         // variable name.
-        operands[p_decl->getNameAsString()] += 1;
+        operands[p_decl->getNameAsString()]++;
         // type name.
         if (p_decl->getType().getTypePtr()->getContainedAutoType()) {
-            operands["auto"] += 1;
+            operators["auto"]++;
+        } else if (p_decl->getType().getAsString() == "_Bool") {
+            operators["bool"]++;
         } else {
-            operands[p_decl->getType().getAsString()] += 1;
+            operators[p_decl->getType().getAsString()]++;
         }
 
         // type var = init ?
         if (p_decl->hasInit()) {
-            operators["="] += 1;
+            operators["="]++;
         }
 
         return true;
@@ -181,13 +183,13 @@ class MyRecursiveASTVisitor
     bool VisitAccessSpecDecl(clang::AccessSpecDecl *p_decl) {
         switch (p_decl->getAccess()) {
             case clang::AS_public:
-                operands["public"] += 1;
+                operators["public"]++;
                 break;
             case clang::AS_protected:
-                operands["protected"] += 1;
+                operators["protected"]++;
                 break;
             case clang::AS_private:
-                operands["private"] += 1;
+                operators["private"]++;
                 break;
             default:
                 break;
@@ -200,17 +202,17 @@ class MyRecursiveASTVisitor
      * Function/Method/Constructor/Destructor declaration.
      */
     bool VisitFunctionDecl(clang::FunctionDecl *p_decl) {
-        operands[p_decl->getNameAsString()] += 1;
+        operators[p_decl->getNameAsString()]++;
 
         // if not a constructor or a destructor then get the return type.
         if (!(clang::isa<clang::CXXConstructorDecl>(p_decl) ||
               clang::isa<clang::CXXDestructorDecl>(p_decl))) {
-            operands[p_decl->getReturnType().getAsString()] += 1;
+            operators[p_decl->getReturnType().getAsString()]++;
         }
 
         // if not a method and not a global function then it is a static function.
         if (!(clang::isa<clang::CXXMethodDecl>(p_decl) || p_decl->isGlobal())) {
-            operands["static"] += 1;
+            operators["static"]++;
         }
 
         return true;
@@ -220,9 +222,9 @@ class MyRecursiveASTVisitor
      * Field declaration.
      */
     bool VisitFieldDecl(clang::FieldDecl *p_decl) {
-        operands[p_decl->getType().getAsString()] += 1;
+        operators[p_decl->getType().getAsString()]++;
 
-        operands[p_decl->getNameAsString()] += 1;
+        operands[p_decl->getNameAsString()]++;
 
         return true;
     }
@@ -231,7 +233,7 @@ class MyRecursiveASTVisitor
      * Return statement declaration.
      */
     bool VisitReturnStmt(clang::ReturnStmt *p_stmt) {
-        operators["return"] += 1;
+        operators["return"]++;
 
         return true;
     }
@@ -246,34 +248,34 @@ class MyRecursiveASTVisitor
      * thus, the tokens "0x10" and "16" are considered as the same operand.
      */
     bool VisitIntegerLiteral(clang::IntegerLiteral *p_lit) {
-        operands[p_lit->getValue().toString(10, false)] += 1;
+        operands[p_lit->getValue().toString(10, false)]++;
 
         return true;
     }
 
     bool VisitCharacterLiteral(clang::CharacterLiteral *p_lit) {
-        operands[std::to_string(p_lit->getValue())] += 1;
+        operands[std::to_string(p_lit->getValue())]++;
 
         return true;
     }
 
     bool VisitStringLiteral(clang::StringLiteral *p_lit) {
-        operands[p_lit->getString().str()] += 1;
+        operands["'" + p_lit->getString().str() + "'"]++;
 
         return true;
     }
 
     bool VisitFloatingLiteral(clang::FloatingLiteral *p_lit) {
-        operands[std::to_string(p_lit->getValueAsApproximateDouble())] += 1;
+        operands[std::to_string(p_lit->getValueAsApproximateDouble())]++;
 
         return true;
     }
 
     bool VisitCXXBoolLiteralExpr(clang::CXXBoolLiteralExpr *p_expr) {
         if (p_expr->getValue()) {
-            operands["true"] += 1;
+            operands["true"]++;
         } else {
-            operands["false"] += 1;
+            operands["false"]++;
         }
 
         return true;
@@ -283,7 +285,7 @@ class MyRecursiveASTVisitor
      * nullptr.
      */
     bool VisitCXXNullPtrLiteralExpr(clang::CXXNullPtrLiteralExpr *p_expr) {
-        operands["nullptr"] += 1;
+        operands["nullptr"]++;
 
         return true;
     }
@@ -294,7 +296,7 @@ class MyRecursiveASTVisitor
     bool VisitDeclRefExpr(clang::DeclRefExpr *p_expr) {
         // Function calls are handled by VisitCallExpr.
         if (!p_expr->getDecl()->getAsFunction()) {
-            operands[p_expr->getNameInfo().getName().getAsString()] += 1;
+            operands[p_expr->getNameInfo().getName().getAsString()]++;
         }
 
         return true;
@@ -305,8 +307,8 @@ class MyRecursiveASTVisitor
      */
     bool VisitCallExpr(clang::CallExpr *p_expr) {
         if (auto callee = p_expr->getDirectCallee()) {
-            operands[callee->getNameAsString()] += 1;
-            operators["()"] += 1;
+            operators[callee->getNameAsString()]++;
+            operators["()"]++;
         }
 
         return true;
@@ -320,7 +322,7 @@ class MyRecursiveASTVisitor
      * Unary operator.
      */
     bool VisitUnaryOperator(clang::UnaryOperator *p_op) {
-        operators[clang::UnaryOperator::getOpcodeStr(p_op->getOpcode()).str()] += 1;
+        operators[clang::UnaryOperator::getOpcodeStr(p_op->getOpcode()).str()]++;
 
         return true;
     }
@@ -345,13 +347,13 @@ class MyRecursiveASTVisitor
     bool VisitTemplateTypeParmDecl(clang::TemplateTypeParmDecl *p_decl) {
         // template parameter is declared as typename or class.
         if (p_decl->wasDeclaredWithTypename()) {
-            operands["typename"] += 1;
+            operators["typename"]++;
         } else {
-            operands["class"] += 1;
+            operators["class"]++;
         }
 
         // template parameter name.
-        operands[p_decl->getNameAsString()] += 1;
+        operands[p_decl->getNameAsString()]++;
 
         return true;
     }
@@ -360,8 +362,8 @@ class MyRecursiveASTVisitor
      * Function template.
      */
     bool VisitFunctionTemplateDecl(clang::FunctionTemplateDecl *p_decl) {
-        operands["template"] += 1;
-        operators["<>"] += 1;
+        operators["template"]++;
+        operators["<>"]++;
 
         return true;
     }
@@ -370,8 +372,8 @@ class MyRecursiveASTVisitor
      * Class template.
      */
     bool VisitClassTemplateDecl(clang::ClassTemplateDecl *p_decl) {
-        operators["template"] += 1;
-        operators["<>"] += 1;
+        operators["template"]++;
+        operators["<>"]++;
 
         return true;
     }
@@ -388,16 +390,16 @@ class MyRecursiveASTVisitor
      * evaluated.
      */
     bool VisitUsingDecl(clang::UsingDecl *p_decl) {
-        operands["using"] += 1;
-        operands[p_decl->getQualifiedNameAsString()] += 1;
+        operators["using"]++;
+        operands[p_decl->getQualifiedNameAsString()]++;
 
         return true;
     }
 
     bool VisitUsingDirectiveDecl(clang::UsingDirectiveDecl *p_decl) {
-        operands["using"] += 1;
-        operands["namespace"] += 1;
-        operands[p_decl->getNominatedNamespace()->getNameAsString()] += 1;
+        operators["using"]++;
+        operators["namespace"]++;
+        operands[p_decl->getNominatedNamespace()->getNameAsString()]++;
 
         return true;
     }
@@ -406,10 +408,10 @@ class MyRecursiveASTVisitor
      * Type alias: "using type = underlyingtype;"
      */
     bool VisitTypeAliasDecl(clang::TypeAliasDecl *p_decl) {
-        operands["using"] += 1;
-        operands[p_decl->getNameAsString()] += 1;
-        operators["="] += 1;
-        operands[p_decl->getUnderlyingType().getAsString()] += 1;
+        operators["using"]++;
+        operands[p_decl->getNameAsString()]++;
+        operators["="]++;
+        operands[p_decl->getUnderlyingType().getAsString()]++;
 
         return true;
     }
@@ -419,7 +421,7 @@ class MyRecursiveASTVisitor
      * TODO: to be continued...
      */
     bool VisitTypeAliasTemplateDecl(clang::TypeAliasTemplateDecl *p_decl) {
-        operands["template"] += 1;
+        operators["template"]++;
 
         return 0;
     }
@@ -432,11 +434,11 @@ class MyRecursiveASTVisitor
      * If.
      */
     bool VisitIfStmt(clang::IfStmt *p_stmt) {
-        operands["if"] += 1;
-        operators["()"] += 1;
+        operators["if"]++;
+        operators["()"]++;
 
         if (p_stmt->getElse()) {
-            operands["else"] += 1;
+            operators["else"]++;
         }
 
         return true;
@@ -446,8 +448,8 @@ class MyRecursiveASTVisitor
      * For.
      */
     bool VisitForStmt(clang::ForStmt *p_stmt) {
-        operators["for"] += 1;
-        operators["()"] += 1;
+        operators["for"]++;
+        operators["()"]++;
 
         return true;
     }
@@ -456,8 +458,8 @@ class MyRecursiveASTVisitor
      * While.
      */
     bool VisitWhileStmt(clang::WhileStmt *p_stmt) {
-        operators["while"] += 1;
-        operators["()"] += 1;
+        operators["while"]++;
+        operators["()"]++;
 
         return true;
     }
@@ -466,9 +468,8 @@ class MyRecursiveASTVisitor
      * Do while.
      */
     bool VisitDoStmt(clang::DoStmt *p_stmt) {
-        operators["do"] += 1;
-        operators["while"] += 1;
-        operators["()"] += 1;
+        operators["do while"]++;
+        operators["()"]++;
 
         return true;
     }
@@ -477,18 +478,18 @@ class MyRecursiveASTVisitor
      * LAMBDAS.
      */
     bool VisitLambdaExpr(clang::LambdaExpr *p_expr) {
-        operators["[]"] += 1;
-        operators["()"] += 1;
+        operators["[]"]++;
+        operators["()"]++;
 
         if (p_expr->getCaptureDefault() == clang::LCD_ByRef) {
-            operators["&"] += 1;
+            operators["&"]++;
         }
 
         for (auto const &capture : p_expr->captures()) {
             if (capture.capturesVariable()) {
                 switch (capture.getCaptureKind()) {
                     case clang::LCK_ByRef:
-                        operators["&"] += 1;
+                        operators["&"]++;
                         break;
                     case clang::LCK_This:
                         break;
@@ -499,7 +500,7 @@ class MyRecursiveASTVisitor
                     case clang::LCK_VLAType:
                         break;
                 }
-                operands[capture.getCapturedVar()->getNameAsString()] += 1;
+                operands[capture.getCapturedVar()->getNameAsString()]++;
             }
         }
 

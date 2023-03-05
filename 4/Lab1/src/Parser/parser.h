@@ -16,6 +16,6 @@ class ParserHalstead {
    public:
     std::tuple<std::vector<std::pair<std::string, int>>,
                std::vector<std::pair<std::string, int>>, int, int, int, int, int,
-               int, int, int, int>
+               int, double>
     parse(int argc, char const *argv[]);
 };
