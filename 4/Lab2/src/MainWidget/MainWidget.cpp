@@ -9,8 +9,6 @@ MainWidget::MainWidget(QWidget* parent) : QWidget(parent) {
     maxdepthLabelText = ui.maxdepthLabel->text();
 }
 
-MainWidget::~MainWidget() {}
-
 void MainWidget::on_chooseFile_clicked() {
     file = QFileDialog::getOpenFileName(this, "Выберите файл", "",
                                         "Source files (*.cpp)");
@@ -40,6 +38,9 @@ void MainWidget::on_parseButton_clicked() {
     argv[5] = "/usr/include/clang/12/include";
     try {
         auto [absolute, relative, max_depth] = parser.parse(6, argv);
+        ui.absoluteLabel->setText(absoluteLabelText + QString::number(absolute));
+        ui.relativeLabel->setText(relativeLabelText + QString::number(relative));
+        ui.maxdepthLabel->setText(maxdepthLabelText + QString::number(max_depth));
     } catch (const CompileException& error) {
         QMessageBox::critical(
             this, "Ошибка",

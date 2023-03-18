@@ -16,7 +16,7 @@ class MainWidget : public QWidget {
 
    public:
     MainWidget(QWidget* parent = nullptr);
-    ~MainWidget();
+    ~MainWidget() = default;
 
    private:
     Ui::Lab2 ui;
