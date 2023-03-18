@@ -131,7 +131,6 @@ class MyRecursiveASTVisitor
         // initializers
         for (auto const &init : p_decl->inits()) {
             operands[init->getMember()->getNameAsString()]++;
-            operators["()"]++;
         }
         return true;
     }
@@ -203,7 +202,6 @@ class MyRecursiveASTVisitor
         if (!(clang::isa<clang::CXXMethodDecl>(p_decl) || p_decl->isGlobal())) {
             operators["static"]++;
         }
-        operators["()"]++;
         return true;
     }
 
@@ -287,9 +285,6 @@ class MyRecursiveASTVisitor
     bool VisitCallExpr(clang::CallExpr *p_expr) {
         if (auto callee = p_expr->getDirectCallee()) {
             operators[callee->getNameAsString()]++;
-            if (!(clang::isa<clang::CXXOperatorCallExpr>(p_expr))) {
-                operators["()"]++;
-            }
         }
         return true;
     }
@@ -449,7 +444,6 @@ class MyRecursiveASTVisitor
      */
     bool VisitIfStmt(clang::IfStmt *p_stmt) {
         operators["if"]++;
-        operators["()"]++;
         if (p_stmt->getElse()) {
             operators["else"]++;
         }
@@ -461,7 +455,6 @@ class MyRecursiveASTVisitor
      */
     bool VisitSwitchStmt(clang::SwitchStmt *s_stmt) {
         operators["switch"]++;
-        operators["()"]++;
 
         return true;
     }
@@ -471,7 +464,6 @@ class MyRecursiveASTVisitor
      */
     bool VisitForStmt(clang::ForStmt *p_stmt) {
         operators["for"]++;
-        operators["()"]++;
         return true;
     }
 
@@ -480,7 +472,6 @@ class MyRecursiveASTVisitor
      */
     bool VisitWhileStmt(clang::WhileStmt *p_stmt) {
         operators["while"]++;
-        operators["()"]++;
         return true;
     }
 
@@ -489,7 +480,6 @@ class MyRecursiveASTVisitor
      */
     bool VisitDoStmt(clang::DoStmt *p_stmt) {
         operators["do while"]++;
-        operators["()"]++;
         return true;
     }
 
@@ -498,7 +488,6 @@ class MyRecursiveASTVisitor
      */
     bool VisitLambdaExpr(clang::LambdaExpr *p_expr) {
         operators["[]"]++;
-        operators["()"]++;
         if (p_expr->getCaptureDefault() == clang::LCD_ByRef) {
             operators["&"]++;
         }
