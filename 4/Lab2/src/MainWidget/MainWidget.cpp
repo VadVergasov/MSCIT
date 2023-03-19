@@ -39,7 +39,10 @@ void MainWidget::on_parseButton_clicked() {
     try {
         auto [absolute, relative, max_depth] = parser.parse(6, argv);
         ui.absoluteLabel->setText(absoluteLabelText + QString::number(absolute));
-        ui.relativeLabel->setText(relativeLabelText + QString::number(relative));
+        ui.relativeLabel->setText(
+            relativeLabelText + QString::number(absolute) + " / " +
+            QString::number(MyRecursiveASTVisitor::operators_count) + " = " +
+            QString::number(relative));
         ui.maxdepthLabel->setText(maxdepthLabelText + QString::number(max_depth));
     } catch (const CompileException& error) {
         QMessageBox::critical(

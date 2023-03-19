@@ -86,7 +86,7 @@
    <item>
     <widget class="QLabel" name="relativeLabel">
      <property name="text">
-      <string>Относительная сложность программы = </string>
+      <string>Относительная сложность программы: </string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
