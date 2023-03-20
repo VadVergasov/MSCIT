@@ -132,6 +132,16 @@ class MyRecursiveASTVisitor
                 p_stmt = p_stmt->getNextSwitchCase();
                 continue;
             }
+            count++;
+            p_stmt = p_stmt->getNextSwitchCase();
+        }
+        count--;
+        p_stmt = s_stmt->getSwitchCaseList();
+        while (p_stmt) {
+            if (llvm::dyn_cast<clang::DefaultStmt>(p_stmt) != nullptr) {
+                p_stmt = p_stmt->getNextSwitchCase();
+                continue;
+            }
             auto cstart = p_stmt->getBeginLoc();
             auto cend = p_stmt->getEndLoc();
             if (depthes.find({cstart, cend}) != depthes.end()) {
@@ -152,7 +162,7 @@ class MyRecursiveASTVisitor
                 max_depth = std::max({max_depth, s, depthes[{cstart, cend}]});
             }
             p_stmt = p_stmt->getNextSwitchCase();
-            count++;
+            count--;
         }
         branches_count = depthes.size();
         return true;
